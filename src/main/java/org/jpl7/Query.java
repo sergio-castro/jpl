@@ -14,15 +14,24 @@ import org.jpl7.fli.qid_t;
 import org.jpl7.fli.term_t;
 
 /**
- * A Query instance is created by an application in order to query the Prolog database (or to invoke a built-in predicate). It is initialised with a Compound (or Atom) denoting the goal which is to be
- * called, and also contains assorted private state relating to solutions. In some future version, it may contain details of the module in which the goal is to be called.
+ * A Query instance is created by an application in order to query the Prolog
+ * database (or to invoke a built-in predicate). It is initialised with a
+ * Compound (or Atom) denoting the goal which is to be called, and also contains
+ * assorted private state relating to solutions. In some future version, it may
+ * contain details of the module in which the goal is to be called.
  * <p>
- * A Query is either open or closed: when closed, it has no connection to the Prolog system; when open, it is linked to an active goal within a Prolog engine.
+ * A Query is either open or closed: when closed, it has no connection to the
+ * Prolog system; when open, it is linked to an active goal within a Prolog
+ * engine.
  * <p>
- * The Query class implements the Enumeration interface, through which one can obtain successive solutions. The Enumeration hasMoreElements() method returns true if the call or redo succeeded
- * (otherwise false), and if the call or redo did succeed, the nextElement() method returns a Map representing variable bindings; the elements in the Map are Terms, indexed by the (String) names of
- * the Variables with which they are associated. For example, if <i>p(a)</i> and <i>p(b)</i> are facts in the Prolog database, then the following is equivalent to printing all the solutions to the
- * Prolog query <i>p(X)</i>:
+ * The Query class implements the Enumeration interface, through which one can
+ * obtain successive solutions. The Enumeration hasMoreElements() method returns
+ * true if the call or redo succeeded (otherwise false), and if the call or redo
+ * did succeed, the nextElement() method returns a Map representing variable
+ * bindings; the elements in the Map are Terms, indexed by the (String) names of
+ * the Variables with which they are associated. For example, if <i>p(a)</i> and
+ * <i>p(b)</i> are facts in the Prolog database, then the following is
+ * equivalent to printing all the solutions to the Prolog query <i>p(X)</i>:
  *
  * <pre>
  * Variable X = new Variable(&quot;X&quot;);
@@ -35,8 +44,10 @@ import org.jpl7.fli.term_t;
  * }
  * </pre>
  *
- * Make sure to close the Query (using the close() method) if you do not need any further solutions which it may have. It is safe (although redundant) to close a Query whose solutions are already
- * exhausted, or which is already closed.
+ * Make sure to close the Query (using the close() method) if you do not need
+ * any further solutions which it may have. It is safe (although redundant) to
+ * close a Query whose solutions are already exhausted, or which is already
+ * closed.
  *
  * To obtain just one solution from a Query, use the oneSolution() method.
  *
@@ -44,52 +55,54 @@ import org.jpl7.fli.term_t;
  *
  * To obtain at most N solutions, use the nSolutions() method.
  *
- * To determine merely whether the Query is provable, use the hasSolution() method (i.e. has at least one solution).
+ * To determine merely whether the Query is provable, use the hasSolution()
+ * method (i.e. has at least one solution).
  * <hr>
  * Copyright (C) 2007 Paul Singleton
  * <p>
  * Copyright (C) 1998 Fred Dushin
  * <p>
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * modification, are permitted provided that the following conditions are met:
  *
  * <ol>
- * <li> Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
+ * <li>Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
  *
- * <li> Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in
- *      the documentation and/or other materials provided with the
- *      distribution.
+ * <li>Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  * </ol>
  *
  * <p>
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  * <hr>
  *
  * @author Fred Dushin <fadushin@syr.edu>
  * @version $Revision$
  */
-public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, Term>> { // was Enumeration<Object>
-	private static Map<Long, Query> m = new HashMap<Long, Query>(); // maps (engine_t) engine handle to (Query) topmost query
+public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, Term>> { // was
+																							// Enumeration<Object>
 	/**
-	 * the Compound or Atom (but not Dict, Float, Integer or Variable) corresponding to the goal of this Query
+	 * the Compound or Atom (but not Dict, Float, Integer or Variable)
+	 * corresponding to the goal of this Query
 	 */
 	protected final Term goal_; // an Atom or Compound; set by all initialisers
-	protected final String hostModule = "user"; // until revised constructors allow this to be specified
-	protected final String contextModule = "user"; // until revised constructors allow this to be specified
+	protected final String hostModule = "user"; // until revised constructors
+												// allow this to be specified
+	protected final String contextModule = "user"; // until revised constructors
+													// allow this to be
+													// specified
 
 	/**
 	 * Returns the Term (Atom or Compound) which is the goal of this Query
@@ -101,13 +114,17 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This constructor creates a Query whose goal is the specified Term. The Query is initially closed. <b>NB</b> Creating an instance of the Query class does not result in a call to a Prolog engine.
-	 * <b>NB</b> The goal can be a Compound or an Atom (Atom extends Compound), but cannot be an instance of jpl.Float, jpl.Integer or jpl.Variable.
+	 * This constructor creates a Query whose goal is the specified Term. The
+	 * Query is initially closed. <b>NB</b> Creating an instance of the Query
+	 * class does not result in a call to a Prolog engine. <b>NB</b> The goal
+	 * can be a Compound or an Atom (Atom extends Compound), but cannot be an
+	 * instance of jpl.Float, jpl.Integer or jpl.Variable.
 	 *
 	 * @param t
 	 *            the goal of this Query
 	 */
-	public Query(Term t) { // formerly insisted (confusingly) on a Compound (or Atom)
+	public Query(Term t) { // formerly insisted (confusingly) on a Compound (or
+							// Atom)
 		this.goal_ = Query1(t);
 	}
 
@@ -128,8 +145,11 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * If text denotes an atom, this constructor is shorthand for <font face="monospace">new Query(new Compound(name,args))</font>, but if text denotes a term containing N query (?) symbols and there
-	 * are N args, each query is replaced by its corresponding arg to provide the new Query's goal.
+	 * If text denotes an atom, this constructor is shorthand for
+	 * <font face="monospace">new Query(new Compound(name,args))</font>, but if
+	 * text denotes a term containing N query (?) symbols and there are N args,
+	 * each query is replaced by its corresponding arg to provide the new
+	 * Query's goal.
 	 *
 	 * @param text
 	 *            the name of the principal functor of this Query's goal
@@ -155,7 +175,8 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This constructor builds a Query from the given Prolog source text. Throws PrologException containing error(syntax_error(_),_) if text is invalid.
+	 * This constructor builds a Query from the given Prolog source text. Throws
+	 * PrologException containing error(syntax_error(_),_) if text is invalid.
 	 *
 	 * @param text
 	 *            the Prolog source text of this Query
@@ -179,7 +200,8 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	 * @see java.util.Iterator#hasNext()
 	 */
 	public boolean hasNext() {
-		if (!open) { // lazily open the Query, enabling it to be its own iterator
+		if (!open) { // lazily open the Query, enabling it to be its own
+						// iterator
 			open();
 		}
 		return get1();
@@ -204,15 +226,20 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * These variables are used and set across the hasMoreElements and nextElement Enumeration interface implementation
+	 * These variables are used and set across the hasMoreElements and
+	 * nextElement Enumeration interface implementation
 	 */
 	private boolean open = false;
-	// the following state variables are used and defined only if this query is open:
-	private engine_t engine = null; // handle of attached Prolog engine iff open, else null
-	private Query subQuery = null; // the open Query (if any) on top of which this open Query is stacked, else null
-	private predicate_t predicate = null; // handle of this Query's predicate iff open, else undefined
-	private fid_t fid = null; // id of current Prolog foreign frame iff open, else null
-	private term_t term0 = null; // term refs of this Query's args iff open, else undefined
+	// the following state variables are used and defined only if this query is
+	// open:
+	private engine_t engine = null; // handle of attached Prolog engine iff
+									// open, else null
+	private predicate_t predicate = null; // handle of this Query's predicate
+											// iff open, else undefined
+	private fid_t fid = null; // id of current Prolog foreign frame iff open,
+								// else null
+	private term_t term0 = null; // term refs of this Query's args iff open,
+									// else undefined
 	private qid_t qid = null; // id of current Prolog query iff open, else null
 
 	//
@@ -221,13 +248,16 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	 *
 	 * @return true if the query is open, otherwise false.
 	 */
-	public synchronized final boolean isOpen() {
+	public final boolean isOpen() {
 		return open;
 	}
 
 	/**
-	 * This method returns true if JPL was able to initiate a "call" of this Query within a Prolog engine. It is designed to be used with the nextSolution() method to retrieve one or more
-	 * substitutions in the form of Maps. To iterate through all the solutions to a Query, for example, one might write
+	 * This method returns true if JPL was able to initiate a "call" of this
+	 * Query within a Prolog engine. It is designed to be used with the
+	 * nextSolution() method to retrieve one or more substitutions in the form
+	 * of Maps. To iterate through all the solutions to a Query, for example,
+	 * one might write
 	 *
 	 * <pre>
 	 * Query q = // obtain Query reference
@@ -236,22 +266,9 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	 *     // process solution...
 	 * }
 	 * </pre>
-	 *
-	 * To ensure thread-safety, you should wrap sequential calls to this method in a synchronized block, using the static lock method to obtain the monitor.
-	 *
-	 * <pre>
-	 * Query q = // obtain Query reference
-	 * synchronized ( jpl.Query.lock() ){
-	 *     while ( q.hasMoreElements() ){
-	 *          Map solution = q.nextSolution();
-	 *          // process solution...
-	 *     }
-	 * }
-	 * </pre>
-	 *
 	 * @return true if the Prolog query succeeds; otherwise false.
 	 */
-	public synchronized final boolean hasMoreSolutions() {
+	public final boolean hasMoreSolutions() {
 		if (!open) {
 			open();
 		}
@@ -259,8 +276,10 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This method returns true if JPL was able to initiate a "call" of this Query within the Prolog engine. It is designed to be used with the getSolution() and close() methods to retrieve one or
-	 * more substitutions in the form of Maps.
+	 * This method returns true if JPL was able to initiate a "call" of this
+	 * Query within the Prolog engine. It is designed to be used with the
+	 * getSolution() and close() methods to retrieve one or more substitutions
+	 * in the form of Maps.
 	 *
 	 * <pre>
 	 * Query q = // obtain Query reference
@@ -271,28 +290,27 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	 * }
 	 * </pre>
 	 * <p>
-	 * If this method is called on an already-open Query, or if the query cannot be set up for whatever reason, then a JPLException will be thrown.
+	 * If this method is called on an already-open Query, or if the query cannot
+	 * be set up for whatever reason, then a JPLException will be thrown.
 	 */
-	public synchronized final void open() {
+	public final void open() {
 		if (open) {
 			throw new JPLException("Query is already open");
 		}
-		if (Prolog.thread_self() == -1) { // this Java thread has no attached Prolog engine?
-			engine = Prolog.attach_pool_engine(); // may block for a while, or fail
-			// System.out.println("JPL attaching engine[" + engine.value + "] for " + this.hashCode() + ":" + this.toString());
+		if (Prolog.thread_self() == -1) { // this Java thread has no attached
+											// Prolog engine?
+			engine = Prolog.attach_pool_engine(); // may block for a while, or
+													// fail
+			//System.out.println("JPL attaching engine[" + engine.value + "] for " +
+			//		   this.hashCode() + ":" + this.toString());
 		} else { // this Java thread has an attached engine
 			engine = Prolog.current_engine();
-			// System.out.println("JPL   reusing engine[" + engine.value + "] for " + this.hashCode() + ":" + this.toString());
+			//System.out.println("JPL reusing engine[" + engine.value + "] for " +
+			//		   this.hashCode() + ":" + this.toString());
 		}
-		if (m.containsKey(new Long(engine.value))) {
-			subQuery = m.get(new Long(engine.value)); // get this engine's previous topmost query
-			// System.out.println("JPL   reusing engine[" + engine.value + "] pushing " + subQuery.hashCode() + ":" + subQuery.toString());
-		} else {
-			subQuery = null;
-		}
-		m.put(new Long(engine.value), this); // update this engine's topmost query
 		//
-		// here, we must check for a module prefix, e.g. jpl:jpl_modifier_bit(volatile,T)
+		// here, we must check for a module prefix, e.g.
+		// jpl:jpl_modifier_bit(volatile,T)
 		String module;
 		Term goal;
 		if (goal_.hasFunctor(":", 2)) {
@@ -301,26 +319,32 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 			} else if (goal_.arg(1).isVariable()) {
 				throw new PrologException(Util.textParamsToTerm("error(instantiation_error,?)", new Term[] { goal_ }));
 			} else {
-				throw new PrologException(Util.textParamsToTerm("error(type_error(atom,?),?)", new Term[] { goal_.arg(1), goal_ }));
+				throw new PrologException(
+						Util.textParamsToTerm("error(type_error(atom,?),?)", new Term[] { goal_.arg(1), goal_ }));
 			}
 			goal = goal_.arg(2);
 		} else {
 			module = contextModule;
 			goal = goal_;
 		}
-		predicate = Prolog.predicate(goal.name(), goal.arity(), module); // was hostModule
+		predicate = Prolog.predicate(goal.name(), goal.arity(), module); // was
+																			// hostModule
 		fid = Prolog.open_foreign_frame();
 		Map<String, term_t> varnames_to_vars = new HashMap<String, term_t>();
 		term0 = Term.putTerms(varnames_to_vars, goal.args());
-		// THINKS: invert varnames_to_Vars and use it when getting substitutions?
-		qid = Prolog.open_query(Prolog.new_module(Prolog.new_atom(contextModule)), Prolog.Q_CATCH_EXCEPTION, predicate, term0);
+		// THINKS: invert varnames_to_Vars and use it when getting
+		// substitutions?
+		qid = Prolog.open_query(Prolog.new_module(Prolog.new_atom(contextModule)), Prolog.Q_CATCH_EXCEPTION, predicate,
+				term0);
 		open = true;
 	}
 
-	private final boolean get1() { // try to get the next solution; if none, close the query;
+	private final boolean get1() { // try to get the next solution; if none,
+									// close the query;
 		if (Prolog.next_solution(qid)) {
 			return true;
-		} else { // if failure was due to throw/1, build exception term and throw it
+		} else { // if failure was due to throw/1, build exception term and
+					// throw it
 			term_t exception_term_t = Prolog.exception(qid);
 			if (exception_term_t.value != 0L) {
 				Term exception_term = Term.getTerm(new HashMap<term_t, Variable>(), exception_term_t);
@@ -334,9 +358,12 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This method returns a java.util.Map, which represents a set of bindings from the names of query variables to terms within the solution.
+	 * This method returns a java.util.Map, which represents a set of bindings
+	 * from the names of query variables to terms within the solution.
 	 * <p>
-	 * For example, if a Query has an occurrence of a jpl.Variable, say, named "X", one can obtain the Term bound to "X" in the solution by looking up "X" in the Map.
+	 * For example, if a Query has an occurrence of a jpl.Variable, say, named
+	 * "X", one can obtain the Term bound to "X" in the solution by looking up
+	 * "X" in the Map.
 	 *
 	 * <pre>
 	 * Variable x = new Variable("X");
@@ -349,15 +376,19 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	 * }
 	 * </pre>
 	 *
-	 * Programmers should obey the following rules when using this method. <menu>
-	 * <li>The nextSolution() method should only be called after the hasMoreSolutions() method returns true; otherwise a JPLException will be raised, indicating that the Query is no longer open.
-	 * <li>The nextSolution() and hasMoreSolutions() should be called in the same thread of execution, for a given Query instance. </menu>
+	 * Programmers should obey the following rules when using this method.
+	 * <menu>
+	 * <li>The nextSolution() method should only be called after the
+	 * hasMoreSolutions() method returns true; otherwise a JPLException will be
+	 * raised, indicating that the Query is no longer open.
+	 * <li>The nextSolution() and hasMoreSolutions() should be called in the
+	 * same thread of execution, for a given Query instance. </menu>
 	 *
 	 * This method will throw a JPLException if Query is not open.
 	 *
 	 * @return A Map representing a substitution, or null
 	 */
-	public synchronized final Map<String, Term> getSolution() {
+	public final Map<String, Term> getSolution() {
 		// oughta check: thread has query's engine
 		if (!open) {
 			throw new JPLException("Query is not open");
@@ -368,7 +399,7 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 		}
 	}
 
-	public synchronized final Map<String, Term> getSubstWithNameVars() {
+	public final Map<String, Term> getSubstWithNameVars() {
 		// oughta check: thread has query's engine
 		if (!open) {
 			throw new JPLException("Query is not open");
@@ -380,9 +411,12 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This method returns a java.util.Map, which represents a binding from the names of query variables to terms within the solution.
+	 * This method returns a java.util.Map, which represents a binding from the
+	 * names of query variables to terms within the solution.
 	 * <p>
-	 * For example, if a Query has an occurrence of a jpl.Variable, say, named "X", one can obtain the Term bound to "X" in the solution by looking up "X" in the Map.
+	 * For example, if a Query has an occurrence of a jpl.Variable, say, named
+	 * "X", one can obtain the Term bound to "X" in the solution by looking up
+	 * "X" in the Map.
 	 *
 	 * <pre>
 	 * Variable x = new Variable("X");
@@ -395,15 +429,19 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	 * }
 	 * </pre>
 	 *
-	 * Programmers should obey the following rules when using this method. <menu>
-	 * <li>The nextSolution() method should only be called after the hasMoreSolutions() method returns true; otherwise a JPLException will be raised, indicating that the Query is no longer open.
-	 * <li>The nextSolution() and hasMoreSolutions() should be called in the same thread of execution, for a given Query instance. </menu>
+	 * Programmers should obey the following rules when using this method.
+	 * <menu>
+	 * <li>The nextSolution() method should only be called after the
+	 * hasMoreSolutions() method returns true; otherwise a JPLException will be
+	 * raised, indicating that the Query is no longer open.
+	 * <li>The nextSolution() and hasMoreSolutions() should be called in the
+	 * same thread of execution, for a given Query instance. </menu>
 	 *
 	 * This method will throw a JPLException if Query is not open.
 	 *
 	 * @return A Map representing a substitution.
 	 */
-	public synchronized final Map<String, Term> nextSolution() {
+	public final Map<String, Term> nextSolution() {
 		return get2();
 	}
 
@@ -412,12 +450,23 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 			throw new JPLException("Query is not open");
 		} else {
 			Map<String, Term> substitution = new HashMap<String, Term>();
-			Term.getSubsts(substitution, new HashMap<term_t, Variable>(), goal_.args()); // NB I reckon getSubsts needn't be in Term (but where else?)
+			Term.getSubsts(substitution, new HashMap<term_t, Variable>(), goal_.args()); // NB
+																							// I
+																							// reckon
+																							// getSubsts
+																							// needn't
+																							// be
+																							// in
+																							// Term
+																							// (but
+																							// where
+																							// else?)
 			return substitution;
 		}
 	}
 
-	// assumes that Query's last arg is a Variable which will be bound to [Name=Var,..]
+	// assumes that Query's last arg is a Variable which will be bound to
+	// [Name=Var,..]
 	private final Map<String, Term> get2WithNameVars() {
 		if (!open) {
 			throw new JPLException("Query is not open");
@@ -440,27 +489,31 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This method implements part of the java.util.Enumeration interface. It is a wrapper for hasMoreSolutions.
+	 * This method implements part of the java.util.Enumeration interface. It is
+	 * a wrapper for hasMoreSolutions.
 	 *
-	 * @return true if the Prolog query yields a (or another) solution, else false.
+	 * @return true if the Prolog query yields a (or another) solution, else
+	 *         false.
 	 */
-	public synchronized final boolean hasMoreElements() {
+	public final boolean hasMoreElements() {
 		return hasMoreSolutions();
 	}
 
 	/**
-	 * This method implements part of the java.util.Enumeration interface. It is a wrapper for nextSolution.
+	 * This method implements part of the java.util.Enumeration interface. It is
+	 * a wrapper for nextSolution.
 	 * <p>
 	 *
 	 * @return A Map representing a substitution.
 	 */
-	public synchronized final Object nextElement() {
+	public final Object nextElement() {
 		return nextSolution();
 	}
 
 	/**
-	 * This method can be used to close an open query before its solutions are exhausted. It is called automatically when solutions are exhausted. Calling close() on an already closed Query has no
-	 * effect.
+	 * This method can be used to close an open query before its solutions are
+	 * exhausted. It is called automatically when solutions are exhausted.
+	 * Calling close() on an already closed Query has no effect.
 	 * <p>
 	 *
 	 * Here is one way to get the first three solutions to a Query:
@@ -474,7 +527,7 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	 * </pre>
 	 * <p>
 	 */
-	public synchronized final void close() {
+	public final void close() {
 		if (!open) {
 			return; // it is not an error to attempt to close a closed Query
 		}
@@ -484,44 +537,53 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 		if (Prolog.current_engine().value != engine.value) {
 			throw new JPLException("this Query's engine is not that which is attached to this thread");
 		}
-		Query topmost = m.get(new Long(engine.value));
-		if (topmost != this) {
-			throw new JPLException("this Query (" + this.hashCode() + ":" + this.toString() + ") is not topmost (" + topmost.hashCode() + ":" + topmost.toString() + ") within its engine["
-					+ engine.value + "]");
+		qid_t topmost = Prolog.current_query();
+		if (topmost.value != this.qid.value) {
+			throw new JPLException("this Query (" + this.hashCode() + ":" + this.toString() + ") is not topmost ("
+					+ topmost.hashCode() + ":" + topmost.toString() + ") within its engine[" + engine.value + "]");
 		}
 		Prolog.close_query(qid);
 		qid = null; // for tidiness
 		org.jpl7.fli.Prolog.discard_foreign_frame(fid);
 		fid = null; // for tidiness
-		m.remove(new Long(engine.value));
-		if (subQuery == null) { // only Query open in this engine?
-			if (Prolog.current_engine_is_pool()) { // this (Query's) engine is from the pool?
+		if (Prolog.current_query() == null) { // only Query open in this engine?
+			if (Prolog.current_engine_is_pool()) { // this (Query's) engine is
+													// from the pool?
 				Prolog.release_pool_engine();
-				// System.out.println("JPL releasing engine[" + engine.value + "]");
+				// System.out.println("JPL releasing engine[" + engine.value +
+				// "]");
 			} else {
-				// System.out.println("JPL   leaving engine[" + engine.value + "]");
+				// System.out.println("JPL leaving engine[" + engine.value +
+				// "]");
 			}
 		} else {
-			m.put(new Long(engine.value), subQuery);
-			// System.out.println("JPL retaining engine[" + engine.value + "] popping subQuery(" + subQuery.hashCode() + ":" + subQuery.toString() + ")");
+			// System.out.println("JPL retaining engine[" + engine.value + "]
 		}
 		open = false; // this Query is now closed
-		engine = null; // this Query, being closed, is no longer associated with any Prolog engine
-		subQuery = null; // this Query, being closed, is not stacked upon any other Query
+		engine = null; // this Query, being closed, is no longer associated with
+						// any Prolog engine
 	}
 
 	/**
-	 * calls the Query's goal to exhaustion and returns an array of zero or more Maps of zero or more variablename-to-term bindings (each Map represents a solution, in the order in which they were
-	 * found).
+	 * calls the Query's goal to exhaustion and returns an array of zero or more
+	 * Maps of zero or more variablename-to-term bindings (each Map represents a
+	 * solution, in the order in which they were found).
 	 *
-	 * @return an array of zero or more Maps of zero or more variablename-to-term bindings (each Map represents a solution, in the order in which they were found) <b>NB</b> in JPL 1.0.1, this method
-	 *         (inconsistently) returned null when a Query had no solutions; in JPL 2.x onwards it returns an empty array (thus the length of the array is, in every case, the quantity of solutions).
+	 * @return an array of zero or more Maps of zero or more
+	 *         variablename-to-term bindings (each Map represents a solution, in
+	 *         the order in which they were found) <b>NB</b> in JPL 1.0.1, this
+	 *         method (inconsistently) returned null when a Query had no
+	 *         solutions; in JPL 2.x onwards it returns an empty array (thus the
+	 *         length of the array is, in every case, the quantity of
+	 *         solutions).
 	 *         <p>
-	 *         <b>NB</b> in JPL 1.0.1, bindings were keyed (awkwardly) by Variable instances; in JPL 2.x onwards they are keyed by the (String) names of variables, which is consistent with the Term
+	 *         <b>NB</b> in JPL 1.0.1, bindings were keyed (awkwardly) by
+	 *         Variable instances; in JPL 2.x onwards they are keyed by the
+	 *         (String) names of variables, which is consistent with the Term
 	 *         type being just a concrete syntax for terms (and hence queries).
 	 *         <p>
 	 */
-	public synchronized final Map<String, Term>[] allSolutions() {
+	public final Map<String, Term>[] allSolutions() {
 		if (open) {
 			throw new JPLException("Query is already open");
 		} else { // get a vector of solutions, then turn it into an array
@@ -530,7 +592,8 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 			// v.addElement(nextSolution());
 			// }
 			// @SuppressWarnings("unchecked")
-			// Map<String, Term> solutions[] = (Map<String, Term>[]) new HashMap[v.size()]; // 0 solutions -> Map[0]
+			// Map<String, Term> solutions[] = (Map<String, Term>[]) new
+			// HashMap[v.size()]; // 0 solutions -> Map[0]
 			// v.copyInto(solutions);
 			// return solutions;
 			// get a List of solutions:
@@ -545,10 +608,15 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This static method creates a Query whose goal is the given Term, calls it to exhaustion, and returns an array of zero or more Maps of zero or more variablename-to-term bindings (each Map
-	 * represents a solution, in the order in which they were found). Throws JPLException if goal is neither a jpl.Atom nor a jpl.Compound.
+	 * This static method creates a Query whose goal is the given Term, calls it
+	 * to exhaustion, and returns an array of zero or more Maps of zero or more
+	 * variablename-to-term bindings (each Map represents a solution, in the
+	 * order in which they were found). Throws JPLException if goal is neither a
+	 * jpl.Atom nor a jpl.Compound.
 	 *
-	 * @return an array of zero or more Maps of zero or more variablename-to-term bindings (each Map represents a solution, in the order in which they were found)
+	 * @return an array of zero or more Maps of zero or more
+	 *         variablename-to-term bindings (each Map represents a solution, in
+	 *         the order in which they were found)
 	 *
 	 * @param goal
 	 *            the goal of this Query
@@ -558,10 +626,15 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This static method creates a Query from the given Prolog source text fragment, calls it to exhaustion, and returns an array of zero or more Maps of zero or more variablename-to-term bindings
-	 * (each Map represents a solution, in the order in which they were found). Throws PrologException containing error(syntax_error(_),_) if text is invalid.
+	 * This static method creates a Query from the given Prolog source text
+	 * fragment, calls it to exhaustion, and returns an array of zero or more
+	 * Maps of zero or more variablename-to-term bindings (each Map represents a
+	 * solution, in the order in which they were found). Throws PrologException
+	 * containing error(syntax_error(_),_) if text is invalid.
 	 *
-	 * @return an array of zero or more Maps of zero or more variablename-to-term bindings (each Map represents a solution, in the order in which they were found)
+	 * @return an array of zero or more Maps of zero or more
+	 *         variablename-to-term bindings (each Map represents a solution, in
+	 *         the order in which they were found)
 	 *
 	 * @param text
 	 *            a Prolog source text fragment denoting a goal
@@ -571,48 +644,66 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * If text denotes (in traditional Prolog source syntax) a term containing N questionmark (?) symbols and there are N accompanying Term params, this static method replaces each questionmark symbol
-	 * by its respective param, calls the resulting goal to exhaustion, and returns an array of zero or more Maps of zero or more variablename-to-term bindings (each Map represents a solution, in the
-	 * order in which they were found).
+	 * If text denotes (in traditional Prolog source syntax) a term containing N
+	 * questionmark (?) symbols and there are N accompanying Term params, this
+	 * static method replaces each questionmark symbol by its respective param,
+	 * calls the resulting goal to exhaustion, and returns an array of zero or
+	 * more Maps of zero or more variablename-to-term bindings (each Map
+	 * represents a solution, in the order in which they were found).
 	 *
-	 * Otherwise, if text denotes an atom, this static method creates a Query where text is the name of the goal and params are the args; the resulting goal is then called as above. This letter mode
-	 * is redundant, deprecated (informally), and retained only for backward compatibility.
+	 * Otherwise, if text denotes an atom, this static method creates a Query
+	 * where text is the name of the goal and params are the args; the resulting
+	 * goal is then called as above. This letter mode is redundant, deprecated
+	 * (informally), and retained only for backward compatibility.
 	 *
-	 * @return an array of zero or more Maps of zero or more variablename-to-term bindings (each Map represents a solution, in the order in which they were found)
+	 * @return an array of zero or more Maps of zero or more
+	 *         variablename-to-term bindings (each Map represents a solution, in
+	 *         the order in which they were found)
 	 *
 	 * @param text
-	 *            the Prolog source text of a goal, in which questionmarks are regarded as substitutible parameters
+	 *            the Prolog source text of a goal, in which questionmarks are
+	 *            regarded as substitutible parameters
 	 * @param params
-	 *            terms to be substituted for the respective questionmarks in the query text
+	 *            terms to be substituted for the respective questionmarks in
+	 *            the query text
 	 */
 	public static final Map<String, Term>[] allSolutions(String text, Term[] params) {
 		return (new Query(text, params)).allSolutions();
 	}
 
 	/**
-	 * calls the Query's goal to exhaustion or until N solutions are found, whichever is sooner, and returns an array containing (as possibly empty Maps of variablename-to-term bindings) every found
-	 * solution (in the order in which they were found).
+	 * calls the Query's goal to exhaustion or until N solutions are found,
+	 * whichever is sooner, and returns an array containing (as possibly empty
+	 * Maps of variablename-to-term bindings) every found solution (in the order
+	 * in which they were found).
 	 *
-	 * @return an array of Maps (possibly none), each of which is a solution (in the order in which they were found) of the Query; at most 'n' solutions will be found and returned. <b>NB</b> in JPL
-	 *         1.0.1, this method (inconsistently) returned null when a Query had no solutions; in JPL 2.x onwards it returns an empty array (thus the length of the array is, in every case, the
-	 *         quantity of solutions).
+	 * @return an array of Maps (possibly none), each of which is a solution (in
+	 *         the order in which they were found) of the Query; at most 'n'
+	 *         solutions will be found and returned. <b>NB</b> in JPL 1.0.1,
+	 *         this method (inconsistently) returned null when a Query had no
+	 *         solutions; in JPL 2.x onwards it returns an empty array (thus the
+	 *         length of the array is, in every case, the quantity of
+	 *         solutions).
 	 *         <p>
-	 *         <b>NB</b> in JPL 1.0.1, bindings were keyed (awkwardly) by Variable instances; in JPL 2.x onwards they are keyed by the (String) names of variables, which is consistent with the Term
+	 *         <b>NB</b> in JPL 1.0.1, bindings were keyed (awkwardly) by
+	 *         Variable instances; in JPL 2.x onwards they are keyed by the
+	 *         (String) names of variables, which is consistent with the Term
 	 *         type being just a concrete syntax for terms (and hence queries).
 	 *         <p>
 	 */
-	public synchronized final Map<String, Term>[] nSolutions(long n) {
+	public final Map<String, Term>[] nSolutions(long n) {
 		if (open) {
 			throw new JPLException("Query is already open");
 		} else { // get a vector of solutions, then turn it into an array
-		// Vector<Map<String, Term>> v = new Vector<Map<String, Term>>();
-		// for (long i = 0; i++ < n && hasMoreSolutions();) {
-		// v.addElement(nextSolution());
-		// }
-		// @SuppressWarnings("unchecked")
-		// Map<String, Term> solutions[] = (Map<String, Term>[]) new Map[v.size()]; // 0 solutions -> Map[0]
-		// v.copyInto(solutions);
-		// return solutions;
+			// Vector<Map<String, Term>> v = new Vector<Map<String, Term>>();
+			// for (long i = 0; i++ < n && hasMoreSolutions();) {
+			// v.addElement(nextSolution());
+			// }
+			// @SuppressWarnings("unchecked")
+			// Map<String, Term> solutions[] = (Map<String, Term>[]) new
+			// Map[v.size()]; // 0 solutions -> Map[0]
+			// v.copyInto(solutions);
+			// return solutions;
 			List<Map<String, Term>> l = new ArrayList<Map<String, Term>>();
 			for (long i = 0; i++ < n && hasMoreSolutions();) {
 				l.add(next());
@@ -624,8 +715,12 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This static method creates a Query whose goal is the given Term, calls it to exhaustion or until N solutions are found, whichever is sooner, and returns an array containing (as possibly empty
-	 * Maps of variablename-to-term bindings) every found solution (in the order in which they were found). Throws JPLException if goal is neither a jpl.Atom nor a jpl.Compound.
+	 * This static method creates a Query whose goal is the given Term, calls it
+	 * to exhaustion or until N solutions are found, whichever is sooner, and
+	 * returns an array containing (as possibly empty Maps of
+	 * variablename-to-term bindings) every found solution (in the order in
+	 * which they were found). Throws JPLException if goal is neither a jpl.Atom
+	 * nor a jpl.Compound.
 	 *
 	 * @param goal
 	 *            the goal of this Query
@@ -635,9 +730,12 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This static method creates a Query from the given Prolog source text fragment, calls it to exhaustion or until N solutions are found, whichever is sooner, and returns an array containing (as
-	 * possibly empty Maps of variablename-to-term bindings) every found solution (in the order in which they were found). Throws PrologException containing error(syntax_error(_),_) if text is
-	 * invalid.
+	 * This static method creates a Query from the given Prolog source text
+	 * fragment, calls it to exhaustion or until N solutions are found,
+	 * whichever is sooner, and returns an array containing (as possibly empty
+	 * Maps of variablename-to-term bindings) every found solution (in the order
+	 * in which they were found). Throws PrologException containing
+	 * error(syntax_error(_),_) if text is invalid.
 	 *
 	 * @param text
 	 *            a Prolog source text fragment denoting a goal
@@ -647,31 +745,44 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * If text denotes (in traditional Prolog source syntax) a term containing N questionmark (?) symbols and there are N accompanying params, this static method replaces each questionmark symbol by
-	 * its respective param, calls the resulting goal to exhaustion or until N solutions are found, whichever is sooner, and returns an array containing (as possibly empty Maps of variablename-to-term
-	 * bindings) every found solution (in the order in which they were found).
+	 * If text denotes (in traditional Prolog source syntax) a term containing N
+	 * questionmark (?) symbols and there are N accompanying params, this static
+	 * method replaces each questionmark symbol by its respective param, calls
+	 * the resulting goal to exhaustion or until N solutions are found,
+	 * whichever is sooner, and returns an array containing (as possibly empty
+	 * Maps of variablename-to-term bindings) every found solution (in the order
+	 * in which they were found).
 	 *
-	 * Otherwise, if text denotes an atom, this static method creates a Query where text is the name of the goal and params are the args; the resulting goal is then called as above. This latter mode
-	 * is redundant, deprecated (informally), and retained only for backward compatibility.
+	 * Otherwise, if text denotes an atom, this static method creates a Query
+	 * where text is the name of the goal and params are the args; the resulting
+	 * goal is then called as above. This latter mode is redundant, deprecated
+	 * (informally), and retained only for backward compatibility.
 	 *
 	 * @param text
-	 *            the Prolog source text of a goal, in which questionmarks are regarded as substitutible parameters
+	 *            the Prolog source text of a goal, in which questionmarks are
+	 *            regarded as substitutible parameters
 	 * @param params
-	 *            terms to be substituted for the respective questionmarks in the query text
+	 *            terms to be substituted for the respective questionmarks in
+	 *            the query text
 	 */
 	public static final Map<String, Term>[] nSolutions(String text, Term[] params, long n) {
 		return (new Query(text, params)).nSolutions(n);
 	}
 
 	/**
-	 * Returns the first solution, if any, as a (possibly empty) Map of variablename-to-term bindings, else null.
+	 * Returns the first solution, if any, as a (possibly empty) Map of
+	 * variablename-to-term bindings, else null.
 	 *
-	 * This method will throw a JPLException if this Query is already open (and the Query will remain open as before). Otherwise, upon return, the Query will be closed.
+	 * This method will throw a JPLException if this Query is already open (and
+	 * the Query will remain open as before). Otherwise, upon return, the Query
+	 * will be closed.
 	 *
-	 * @return the first solution, if the query has one, as a (possibly empty) Map. If the return value is null, this means that the Query has no solutions.
+	 * @return the first solution, if the query has one, as a (possibly empty)
+	 *         Map. If the return value is null, this means that the Query has
+	 *         no solutions.
 	 *         <p>
 	 */
-	public synchronized final Map<String, Term> oneSolution() {
+	public final Map<String, Term> oneSolution() {
 		if (open) {
 			throw new JPLException("Query is already open");
 		} else {
@@ -687,8 +798,11 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This static method creates a Query (whose goal is the specified Term) and calls it at most once, returning the first solution, if there is one, as a (possibly empty) Map, else null. The goal
-	 * can be a jpl.Atom or a jpl.Compound, but cannot be an instance of jpl.Float, jpl.Integer or jpl.Variable.
+	 * This static method creates a Query (whose goal is the specified Term) and
+	 * calls it at most once, returning the first solution, if there is one, as
+	 * a (possibly empty) Map, else null. The goal can be a jpl.Atom or a
+	 * jpl.Compound, but cannot be an instance of jpl.Float, jpl.Integer or
+	 * jpl.Variable.
 	 *
 	 * @param goal
 	 *            the goal of this Query
@@ -698,8 +812,10 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This static method creates a Query from the given Prolog source text fragment, and calls it at most once, returning the first solution, if there is one, as a (possibly empty) Map, else null.
-	 * Throws PrologException containing error(syntax_error(_),_) if text is invalid.
+	 * This static method creates a Query from the given Prolog source text
+	 * fragment, and calls it at most once, returning the first solution, if
+	 * there is one, as a (possibly empty) Map, else null. Throws
+	 * PrologException containing error(syntax_error(_),_) if text is invalid.
 	 *
 	 * @param text
 	 *            a Prolog source text fragment denoting a goal
@@ -709,38 +825,51 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * If text denotes (in traditional Prolog source syntax) a term containing N questionmark (?) symbols and there are N params, each questionmark symbol is replaced by its respective param to
-	 * provide the goal of this query: the resulting goal is then called (at most once) and the first solution, if there is one, is returned as a (possibly empty) Map, else null.
+	 * If text denotes (in traditional Prolog source syntax) a term containing N
+	 * questionmark (?) symbols and there are N params, each questionmark symbol
+	 * is replaced by its respective param to provide the goal of this query:
+	 * the resulting goal is then called (at most once) and the first solution,
+	 * if there is one, is returned as a (possibly empty) Map, else null.
 	 *
-	 * Otherwise, if text denotes an atom, this static method creates a Query where text is the name of the goal and params are the args; the resulting goal is then called as above. This latter mode
-	 * is redundant, deprecated (informally), and retained only for backward compatibility.
+	 * Otherwise, if text denotes an atom, this static method creates a Query
+	 * where text is the name of the goal and params are the args; the resulting
+	 * goal is then called as above. This latter mode is redundant, deprecated
+	 * (informally), and retained only for backward compatibility.
 	 *
 	 * @param text
-	 *            the Prolog source text of a goal, in which questionmarks are regarded as substitutible parameters
+	 *            the Prolog source text of a goal, in which questionmarks are
+	 *            regarded as substitutible parameters
 	 * @param params
-	 *            terms to be substituted for the respective questionmarks in the query text
+	 *            terms to be substituted for the respective questionmarks in
+	 *            the query text
 	 */
 	public static final Map<String, Term> oneSolution(String text, Term[] params) {
 		return (new Query(text, params)).oneSolution();
 	}
 
 	/**
-	 * This method will attempt to call this Query's goal within an available Prolog engine.
+	 * This method will attempt to call this Query's goal within an available
+	 * Prolog engine.
 	 *
-	 * @return the provability of the Query, i.e. 'true' if it has at least one solution, 'false' if the call fails without finding a solution.
+	 * @return the provability of the Query, i.e. 'true' if it has at least one
+	 *         solution, 'false' if the call fails without finding a solution.
 	 *         <p>
 	 *
-	 *         Only the first solution (if there is one) will be found; any bindings will be discarded, and the Query will be closed.
+	 *         Only the first solution (if there is one) will be found; any
+	 *         bindings will be discarded, and the Query will be closed.
 	 *         <p>
-	 *         This method will throw a JPLException if this Query is already open.
+	 *         This method will throw a JPLException if this Query is already
+	 *         open.
 	 */
-	public synchronized final boolean hasSolution() {
+	public final boolean hasSolution() {
 		return oneSolution() != null;
 	}
 
 	/**
-	 * This static method creates a Query (whose goal is the specified Term) and calls it at most once, returning true if a solution was found, else false. The goal can be a jpl.Atom or a
-	 * jpl.Compound, but cannot be an instance of jpl.Float, jpl.Integer or jpl.Variable.
+	 * This static method creates a Query (whose goal is the specified Term) and
+	 * calls it at most once, returning true if a solution was found, else
+	 * false. The goal can be a jpl.Atom or a jpl.Compound, but cannot be an
+	 * instance of jpl.Float, jpl.Integer or jpl.Variable.
 	 *
 	 * @param goal
 	 *            the goal of this Query
@@ -750,8 +879,10 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * This static method creates a Query from the given Prolog source text and calls it at most once, returning true if a solution was found, else false. Throws PrologException containing
-	 * error(syntax_error(_),_) if text is invalid.
+	 * This static method creates a Query from the given Prolog source text and
+	 * calls it at most once, returning true if a solution was found, else
+	 * false. Throws PrologException containing error(syntax_error(_),_) if text
+	 * is invalid.
 	 *
 	 * @param text
 	 *            the goal of this Query, as Prolog source text
@@ -761,16 +892,23 @@ public class Query implements Iterable<Map<String, Term>>, Iterator<Map<String, 
 	}
 
 	/**
-	 * If text denotes (in traditional Prolog source syntax) a term containing N questionmark (?) symbols and there are N params, each questionmark symbol is replaced by its corresponding arg to
-	 * provide the new Query's goal: the resulting Query is called as described above.
+	 * If text denotes (in traditional Prolog source syntax) a term containing N
+	 * questionmark (?) symbols and there are N params, each questionmark symbol
+	 * is replaced by its corresponding arg to provide the new Query's goal: the
+	 * resulting Query is called as described above.
 	 *
-	 * Otherwise, if text denotes an atom, this static method creates a Query where text is the name of its goal and args are its args; it then calls this goal (at most once) and returns true if a
-	 * solution was found, else false. This latter mode is redundant, deprecated (informally), and retained only for backward compatibility.
+	 * Otherwise, if text denotes an atom, this static method creates a Query
+	 * where text is the name of its goal and args are its args; it then calls
+	 * this goal (at most once) and returns true if a solution was found, else
+	 * false. This latter mode is redundant, deprecated (informally), and
+	 * retained only for backward compatibility.
 	 *
 	 * @param text
-	 *            the Prolog source text of a goal, in which questionmarks are regarded as substitutible parameters
+	 *            the Prolog source text of a goal, in which questionmarks are
+	 *            regarded as substitutible parameters
 	 * @param params
-	 *            terms to be substituted for the respective questionmarks in the query text
+	 *            terms to be substituted for the respective questionmarks in
+	 *            the query text
 	 */
 	public static final boolean hasSolution(String text, Term[] params) {
 		return (new Query(text, params)).hasSolution();
